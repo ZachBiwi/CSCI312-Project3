@@ -19,67 +19,58 @@ int main(int argc, char *argv[]) {
     m = choicesM[i];
 
 
-    sprintf(buf3, "This round of rock, paper, scissors is best of %d", m); //Send number of games to be played to clients, as well as instructions
-    printf("Debugging: %s\n", buf3);
+    sprintf(buf3, "This game of rock, paper, scissors will be best %d out of %d\n", n, m);
+    err = send(cSocket[0], buf3, BUFLEN, 0);
+    err = send(cSocket[1], buf3, BUFLEN, 0);
 
-    err = send(cSocket[0], buf3, strlen(buf3), 0);
-    err = send(cSocket[1], buf3, strlen(buf3), 0);
-
-    for (i = 0; i < m; i++) {                              //For (up to) m
-        printf("Entering loop for the %d time!\n", i);
+    for (i = 0; ; i++) {                              //Infinite loop until winner
         memset(buf1, 0, 2);                     //reset three buffers
         memset(buf2, 0, 2);  
-        memset(buf3, 0, BUFLEN);  
+        memset(buf3, 0, BUFLEN);
+          
         err = recv(cSocket[0], buf1, 2, 0);        //Recv
-        printf("%s\n", buf1);
-
         err = recv(cSocket[1], buf2, 2, 0);
-        printf("%s\n", buf2);
-
         result = rps(buf1[0], buf2[0]);
-        printf("Result: %d\n", result);
 
         if (result == 1) {
-            printf("Entered result = 1 if statement\n");
             numberOfWins[0]++;
+            if (numberOfWins[0] == n) {
+                err = send(cSocket[0], "+", BUFLEN, 0);
+                err = send(cSocket[1], "-", BUFLEN, 0);
+                break;
+            }
             sprintf(buf3, "Winner of round %d\nNumber of wins: %d\n", i + 1, numberOfWins[0]);
-            err = send(cSocket[0], buf3, 50, 0);
+            err = send(cSocket[0], buf3, BUFLEN, 0);
             memset(buf3, 0, BUFLEN); 
             sprintf(buf3, "Loser of round %d\nNumber of wins: %d\n", i + 1, numberOfWins[1]);
-            err = send(cSocket[1], buf3, 50, 0);
-
-            if (numberOfWins[0] == n) {
-                err = send(cSocket[0], "winnerwinner", 13, 0);
-                err = send(cSocket[1], "loserloser", 11, 0);
-                break;
-            }
+            err = send(cSocket[1], buf3, BUFLEN, 0);
         }
         else if (result == 2) {
-            printf("Entered result = 2 if statement\n");
             numberOfWins[1]++;
-            sprintf(buf3, "Loser of round %d\nNumber of wins: %d\n", i + 1, numberOfWins[0]);
-            err = send(cSocket[0], buf3, 50, 0);
-            memset(buf3, 0, BUFLEN); 
-            sprintf(buf3, "Winner of round %d\nNumber of wins: %d\n", i + 1, numberOfWins[1]);
-            err = send(cSocket[1], buf3, 50, 0);
             if (numberOfWins[1] == n) {
-                err = send(cSocket[0], "loserloser", 11, 0);
-                err = send(cSocket[1], "winnerwinner", 13, 0);
+                err = send(cSocket[0], "-", BUFLEN, 0);
+                err = send(cSocket[1], "+", BUFLEN, 0);
                 break;
             }
+            sprintf(buf3, "Loser of round %d\nNumber of wins: %d\n", i + 1, numberOfWins[0]);
+            err = send(cSocket[0], buf3, BUFLEN, 0);
+            memset(buf3, 0, BUFLEN); 
+            sprintf(buf3, "Winner of round %d\nNumber of wins: %d\n", i + 1, numberOfWins[1]);
+            err = send(cSocket[1], buf3, BUFLEN, 0);
         }
         else if (result == 0) {
-            printf("Entered result = 0 if statement\n");
             sprintf(buf3, "tie on round %d\n", i + 1);
-            err = send(cSocket[0], buf3, 50, 0);
-            err = send(cSocket[1], buf3, 50, 0);
+            i--;
+            err = send(cSocket[0], buf3, BUFLEN, 0);
+            err = send(cSocket[1], buf3, BUFLEN, 0);
         }
         else /*Something went wrong, should never be here*/ {
             i--;
             sprintf(buf3, "error\n");
-            err = send(cSocket[0], buf3, 6, 0);
-            err = send(cSocket[1], buf3, 6, 0);
+            err = send(cSocket[0], buf3, BUFLEN, 0);
+            err = send(cSocket[1], buf3, BUFLEN, 0);
         }
+        printf("Player0 wins: %d\nPlayer1 wins: %d\n", numberOfWins[0], numberOfWins[1]);
     }
 
 
@@ -90,8 +81,6 @@ int main(int argc, char *argv[]) {
 
 
 int rps(char x, char y) {
-    printf("char x: %c\n", x);
-    printf("char y: %c\n", y);
     /*Tie cases*/
     if (x == 'r' && y == 'r')
         return 0;

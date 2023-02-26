@@ -64,9 +64,8 @@ int main(int argc, char *argv[]) {
         execl("./ServerG", "ServerG" , sockBuff1, sockBuff2, NULL);      //Exec ServerG, the rockpaperscissors game
     }                                                                            //With both client's socket descriptors
     else /*Parent process*/ {
-        //while{}
-        //printf("In parent process!");
-        //while
+        printf("In parent process!");
+            //execl("./ServerC", "ServerC", port + 1, NULL);
     }
     
     exit (0);

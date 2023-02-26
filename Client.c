@@ -32,19 +32,18 @@ int main(int argc, char *argv[]){
         exit (2);
     }
     // Send message to server.
-    err = send(cSocket, "Connection made!\n", 20, 0);
+    err = send(cSocket, "Connection made!\n", BUFLEN, 0);
     printf("socClient: number of bytes sent to server: %d\n", err);
 
 
     //At this point, connection has been made to the server, and we start playing the game
     int i;
     for (;;) {                                          //infinite loop
-        printf("Client loop %d\n", i++);
         err = recv(cSocket, buf1, BUFLEN, 0);            //Wait for a response from server
-        if (strstr(buf1, "winnerwinner") != NULL) {            //Test for winner/loser
+        if (buf1[0] == '+') {            //Test for winner/loser
             printf("You have won!\n");
             break;
-        } else if (strstr(buf1, "loserloser") != NULL) {
+        } else if (buf1[0] == '-') {
             printf("You have lost\n");
             break;
         } else {
@@ -53,9 +52,10 @@ int main(int argc, char *argv[]){
             memset(buf1, 0, sizeof(buf1));                  //Reset buffer
             memset(buf2, 0, sizeof(buf2));
 
-            
             printf("\nEnter r (rock), p (paper), or s (scissors): ");
-            scanf("%c", buf2);                                 //Wait for client response
+            do {
+                scanf("%c", buf2);                                 //Wait for client response
+            } while (buf2[0] != 'r' && buf2[0] != 'p' && buf2[0] != 's');   //error checking
             send(cSocket, buf2, sizeof(buf2), 0);
         }
     }
