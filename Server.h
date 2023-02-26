@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <stdbool.h>
 #define SERVERPORT 54321
 #define SERVERPORTSTR "54321"
